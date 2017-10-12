@@ -1,38 +1,29 @@
-import tensorflow as tf 
+import tensorflow as tf
 
-print("Starting...")
-sess = tf.Session()
+# Model parameters
 W = tf.Variable([.3], dtype=tf.float32)
 b = tf.Variable([-.3], dtype=tf.float32)
+# Model input and output
 x = tf.placeholder(tf.float32)
 linear_model = W * x + b
-# print(linear_model)
-#variables will never initialized until we run the call below
-init = tf.global_variables_initializer()
-sess.run(init)
-print(sess.run(linear_model,{x:[1,2,3,4]}))
-
-# loss function
-# Aloss function measures how far apart the current model is from the provided data
-# which is the sum of the deltas between the current model and the provided data
 y = tf.placeholder(tf.float32)
-squared_deltas = tf.square(linear_model-y)
-loss = tf.reduce_sum(squared_deltas)
-print(sess.run(loss,{x:[1,2,3,4],y:[0,-1,-2,-3]}))
 
-# changing the variable default values
-fixW = tf.assign(W,[-1.])
-fixb = tf.assign(b,[1.])
-sess.run([fixW,fixb])
-print(sess.run(loss,{x:[1,2,3,4],y:[0,-1,-2,-3]}))
-
+# loss
+loss = tf.reduce_sum(tf.square(linear_model - y)) # sum of the squares
+# optimizer
 optimizer = tf.train.GradientDescentOptimizer(0.01)
 train = optimizer.minimize(loss)
-#reseting the values to default
-sess.run(init)
+
+# training data
+x_train = [1, 2, 3, 4]
+y_train = [0, -1, -2, -3]
+# training loop
+init = tf.global_variables_initializer()
+sess = tf.Session()
+sess.run(init) # reset values to wrong
 for i in range(1000):
-	sess.run(train,{x:[1,2,3,4],y:[0,-1,-2,-3]})
+  sess.run(train, {x: x_train, y: y_train})
 
-print(sess.run([W,b]))
-
-
+# evaluate training accuracy
+curr_W, curr_b, curr_loss = sess.run([W, b, loss], {x: x_train, y: y_train})
+print("W: %s b: %s loss: %s"%(curr_W, curr_b, curr_loss))
